@@ -7,6 +7,8 @@ import (
 	"github.com/brecabral/go-apis/internal/entity"
 	"github.com/brecabral/go-apis/internal/infra/database"
 	"github.com/brecabral/go-apis/internal/infra/webserver/handlers"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -24,7 +26,12 @@ func main() {
 
 	productDB := database.NewProduct(db)
 	productHandler := handlers.NewProductHandler(productDB)
+
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Post("/products", productHandler.CreateProduct)
+
 	http.HandleFunc("/products", productHandler.CreateProduct)
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", r)
 }
